@@ -294,26 +294,27 @@ class FeatureCollector:
                 else:
                     modification_full_name = modification_full_name_initial
 
-                modified_residue_code = structure.mod_name_to_mod_code[modification_full_name]
-                unmodified_residue_code = structure.mod_code_to_unmod_code[modified_residue_code]
-                if not structure.build_ses():
-                    print("Failed to build ses for {}".format(filename))
-                    files_processed += 1
-                    continue
+                if modification_full_name in structure.mod_name_to_mod_code:
+                    modified_residue_code = structure.mod_name_to_mod_code[modification_full_name]
+                    unmodified_residue_code = structure.mod_code_to_unmod_code[modified_residue_code]
+                    if not structure.build_ses():
+                        print("Failed to build ses for {}".format(filename))
+                        files_processed += 1
+                        continue
 
-                for residue in structure.get_residues():
-                    if residue.canonical_name == unmodified_residue_code:
-                        residue.status = "modified" if residue.resname == modified_residue_code else "unmodified"
-                        if self.use_tertiary:
-                            features = self.collect_features(residue, structure)
-                        else:
-                            features = self.collect_features_primary(residue, structure)
-                        yield features
-                files_processed += 1
-                if files_processed % self.print_step == 0:
-                    if self.show_progress:
-                        print('{0} out of {1} files in {2} processed. {3}'.format(files_processed, pdb_entries,
-                                                                                  data_path, filename))
+                    for residue in structure.get_residues():
+                        if residue.canonical_name == unmodified_residue_code:
+                            residue.status = "modified" if residue.resname == modified_residue_code else "unmodified"
+                            if self.use_tertiary:
+                                features = self.collect_features(residue, structure)
+                            else:
+                                features = self.collect_features_primary(residue, structure)
+                            yield features
+                    files_processed += 1
+                    if files_processed % self.print_step == 0:
+                        if self.show_progress:
+                            print('{0} out of {1} files in {2} processed. {3}'.format(files_processed, pdb_entries,
+                                                                                      data_path, filename))
             # skip non-directory and non-pdb files
             else:
                 continue
